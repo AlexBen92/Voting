@@ -1,0 +1,40 @@
+pragma solidity ^0.8.2;
+
+contract VotingSystem {
+
+    mapping (address => bool) public isAdmin;
+    mapping (address => bool) public isVoter;
+    mapping (address => bool) public hasVoted;
+
+    string public proposal;
+    uint public yesVotes;
+    uint public noVotes;
+
+    event NewVote(address voter, bool vote);
+
+    constructor() public {
+        isAdmin[msg.sender] = true;
+    }
+
+    function addVoter(address _voter) public {
+        require(isAdmin[msg.sender], "Seul l'administrateur peut ajouter des électeurs.");
+        isVoter[_voter] = true;
+    }
+
+    function vote(bool _vote) public {
+        require(isVoter[msg.sender], "Seuls les électeurs autorisés peuvent voter.");
+        require(!hasVoted[msg.sender], "Vous avez déjà voté.");
+
+        hasVoted[msg.sender] = true;
+        if (_vote) {
+            yesVotes++;
+        } else {
+            noVotes++;
+        }
+        emit NewVote(msg.sender, _vote);
+    }
+
+    function getResults() public view returns (uint, uint) {
+        return (yesVotes, noVotes);
+    }
+}
